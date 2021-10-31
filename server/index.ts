@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 createConnection().then(async (connection) => {
-  app.post("/refresh", (req, res) => {
+  app.post("/spotifyapi/refresh", (req, res) => {
     const refreshToken = req.body.refreshToken
     const spotifyApi = new SpotifyWebApi({
       redirectUri: process.env.REDIRECT_URI,
@@ -41,7 +41,7 @@ createConnection().then(async (connection) => {
       });
   });
 
-  app.post("/login", (req, res) => {
+  app.post("/spotifyapi/login", (req, res) => {
     const code = req.body.code;
     const spotifyApi = new SpotifyWebApi({
       redirectUri: process.env.REDIRECT_URI,
@@ -63,7 +63,7 @@ createConnection().then(async (connection) => {
       });
   });
 
-  app.post("/register", async (req, res) => {
+  app.post("/register", async (req, res) => {   
     try {
       const { firstName, lastName, email, password } = req.body;
 
@@ -95,6 +95,10 @@ createConnection().then(async (connection) => {
       );
       // save user token
       user.token = token;
+      user.created = new Date();
+      user.lastLogin = new Date();
+
+      await connection.manager.getRepository(User).save(user);
 
       // return new user
       res.status(201).json(user);
@@ -103,34 +107,48 @@ createConnection().then(async (connection) => {
     }
   });
 
-  // app.post("/login", async (req, res) => {
-  //   try {
-  //     const { email, password } = req.body;
+  app.post("/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
 
-  //     if (!(email && password)) {
-  //       res.status(400).send("All input is required");
-  //     }
-  //     const user = await User.findOne({ email });
+      if (!(email && password)) {
+        res.status(400).send("All input is required");
+      }
+      const user = await connection.manager.getRepository(User).findOne({ email });
 
-  //     if (user && (await bcrypt.compare(password, user.password))) {
-  //       // Create token
-  //       const token = jwt.sign(
-  //         { user_id: user.id, email },
-  //         process.env.TOKEN_KEY,
-  //         { expiresIn: "2h" }
-  //       );
+      if (user && (await bcrypt.compare(password, user.password))) {
+        // Create token
+        const token = jwt.sign(
+          { user_id: user.id, email },
+          process.env.TOKEN_KEY,
+          { expiresIn: "2h" }
+        );
 
-  //       // save user token
-  //       user.token = token;
+        // save user token
+        user.token = token;
 
-  //       // user
-  //       res.status(200).json(user);
-  //     }
-  //     res.status(400).send("Invalid Credentials");
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // });
+        // user
+        res.status(200).json(user);
+      }
+      res.status(400).send("Invalid Credentials");
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  app.post('/refresh', auth, function (req, res) {
+    const token = jwt.sign(
+      { userId: req.user.id, email: req.user.email },
+      process.env.TOKEN_KEY,
+      { expiresIn: "2h" }
+    );
+
+    res.status(201).json({ token });
+  });
+
+  app.post('/session-alive', auth, (_, res) => {
+    res.status(200).json({ authenticated: true });
+  });
 
   // app.get('/playlist', auth, (req, res) => {
 

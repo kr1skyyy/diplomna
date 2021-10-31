@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import useAuth from './useAuth';
+import useAuth from './hooks/useAuth';
 import Player from './Player';
 import TrackSearchResult from './TrackSearchResult';
 import { Form } from 'react-bootstrap';
 import SpotifyWebApi from 'spotify-web-api-node';
 import Drawer from './layout/Drawer';
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 
 const spotifyApi = new SpotifyWebApi({
   clientId: '2736f0fba5bd47febe645ba84dc7fa05',
@@ -58,7 +58,7 @@ export default function Dashboard({ code }) {
   }, [search, accessToken]);
 
   return (
-    <Router>
+    <>
       <Drawer>
         <Switch>
           <Route path="/a">
@@ -86,6 +86,6 @@ export default function Dashboard({ code }) {
       <div className="d-flex align-items-center" style={{ position: 'absolule', bottom: 0, height: 100, padding: '0 20px' }}>
         <Player accessToken={accessToken} trackUri={playingTrack?.uri} />
       </div>
-    </Router>
+    </>
   )
 }

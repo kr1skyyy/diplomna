@@ -1,10 +1,10 @@
 import * as React from 'react';
+import { useHistory } from "react-router-dom";
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
+import { createUrl, fetch, saveAuth } from '../util/utils';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -13,23 +13,12 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
-
 const theme = createTheme();
 
-const Fields = (isSignIn) => {
-    const handleSubmit = (event) => {
+const Fields = ({ isSignIn, setIsSignIn, isLogged, setIsLogged }) => {
+  const history = useHistory();
+
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
 
@@ -42,59 +31,56 @@ const Fields = (isSignIn) => {
             user.firstName = data.get('firstName');
             user.lastName = data.get('lastName');
         }
-        console.log(user);
+
+        const URL = createUrl(isSignIn ? 'login' : 'register');
+
+        fetch(URL, user, 'POST')
+          .then(saveAuth)
+          .then(() => {
+            setIsLogged(true);
+          })
+          .catch(() => {
+            setIsLogged(false);
+          });
     };
     return (
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-            />
-            <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-            />
-            <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-            />
+          {isSignIn
+          ? <>
+              <TextField margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus />
+              <TextField margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password" /> 
+            </>
+          : <>
+              <TextField margin="normal" required fullWidth id="firstName" label="First Name" name="firstName" autoFocus />
+              <TextField margin="normal" required fullWidth name="lastName" label="Last Name" type="lastName" id="lastName" /> 
+              <TextField margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" />
+              <TextField margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password" /> 
+            </>
+          }
+
             <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
             >
-                Sign In
+                {isSignIn ? "Sign In" : "Sign Up" }
             </Button>
+            
             <Grid container>
-                <Grid item xs>
-                <Link href="#" variant="body2">
-                    Forgot password?
-                </Link>
-                </Grid>
                 <Grid item>
-                <Link href="#" variant="body2">
-                    {"Don't have an account? Sign Up"}
-                </Link>
+                  <Link style={{cursor: 'pointer'}} onClick={() => setIsSignIn(!isSignIn)} variant="body2">
+                    {isSignIn ? `Don't have an account? Sign Up` : 'Take me back to Sign In.'}
+                  </Link>
                 </Grid>
             </Grid>
         </Box>
     );
 }
 
-export default function SignIn() {
+export default function SignIn({isLogged, setIsLogged}) {
+  const [isSignIn, setIsSignIn] = React.useState(true);
+
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
@@ -113,9 +99,8 @@ export default function SignIn() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <Fields />
+          <Fields isSignIn={isSignIn} setIsSignIn={setIsSignIn} isLogged={isLogged} setIsLogged={setIsLogged} />
         </Box>
-        <Copyright sx={{ mt: 8, mb: 4 }} />
       </Container>
     </ThemeProvider>
   );
