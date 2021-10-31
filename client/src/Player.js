@@ -19,3 +19,27 @@ export default function Player({ accessToken, trackUri }) {
     />
   )
 }
+
+// Callback state ^
+// export interface State {
+//   currentDeviceId: string;
+//   deviceId: string;
+//   devices: SpotifyDevice[];
+//   error: string;
+//   errorType: string;
+//   isActive: boolean;
+//   isInitializing: boolean;
+//   isMagnified: boolean;
+//   isPlaying: boolean;
+//   isSaved: boolean;
+//   isUnsupported: boolean;
+//   needsUpdate: boolean;
+//   nextTracks: WebPlaybackTrack[];
+//   playerPosition: 'bottom' | 'top';
+//   position: number;
+//   previousTracks: WebPlaybackTrack[];
+//   progressMs: number;
+//   status: string;
+//   track: SpotifyPlayerTrack;
+//   volume: number;
+// }
