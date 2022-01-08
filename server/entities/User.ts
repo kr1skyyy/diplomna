@@ -1,4 +1,5 @@
-import {Entity, Column, ManyToOne, PrimaryColumn, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import {Entity, Column, PrimaryColumn, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import { Playlist } from './index';
 
 @Entity()
 export class User {
@@ -16,6 +17,9 @@ export class User {
 
     @Column()
     password: string;
+
+    @OneToMany(() => Playlist, playlist => playlist.user)
+    playlists: Playlist[];
 
     @Column({type: 'date'})
     created: Date;

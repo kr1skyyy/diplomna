@@ -40,16 +40,14 @@ export default function SidebarDrawer({ children }) {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
-            {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                <Link to="/a">
-                    <ListItem button key={text}>
-                        <ListItemIcon>
-                            {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                        </ListItemIcon>
-                        <ListItemText primary={text} />
-                    </ListItem>
-                </Link>
-            ))}
+              <Link to="/MyPlaylists">
+                  <ListItem button >
+                      <ListItemIcon>
+                          <InboxIcon />
+                      </ListItemIcon>
+                      <ListItemText primary={"My Playlists"} />
+                  </ListItem>
+              </Link>
           </List>
           <Divider />
           <List>

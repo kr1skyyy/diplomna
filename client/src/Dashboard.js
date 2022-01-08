@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { Switch, Route } from "react-router-dom";
+import { Form } from 'react-bootstrap';
 import useAuth from './hooks/useAuth';
 import Player from './Player';
 import TrackSearchResult from './TrackSearchResult';
-import { Form } from 'react-bootstrap';
 import SpotifyWebApi from 'spotify-web-api-node';
 import Drawer from './layout/Drawer';
-import { Switch, Route } from "react-router-dom";
+import MyPlaylists from './pages/playlist/MyPlaylists';
 
 const spotifyApi = new SpotifyWebApi({
   clientId: '2736f0fba5bd47febe645ba84dc7fa05',
@@ -16,6 +17,16 @@ export default function Dashboard({ code }) {
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [playingTrack, setPlayingTrack] = useState();
+  const [message, setMessage] = useState(null);
+
+  document.addEventListener('show-message', (e) => {
+    const msg = e.detail.msg;
+    setMessage(msg);
+
+    setTimeout(() => {
+      setMessage(null);
+    }, 4000);
+  })
 
   function chooseTrack(track) {
     setPlayingTrack(track);
@@ -59,10 +70,11 @@ export default function Dashboard({ code }) {
 
   return (
     <>
+      {message ? message : null}
       <Drawer>
         <Switch>
-          <Route path="/a">
-            <h1>Hi</h1>
+          <Route path="/MyPlaylists">
+            <MyPlaylists/>
           </Route>
           <Route path="/">
             <Form.Control
