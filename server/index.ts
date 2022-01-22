@@ -99,7 +99,7 @@ createConnection().then(async (connection) => {
       const { firstName, lastName, email, password } = req.body;
 
       if (!(email && password && firstName && lastName)) {
-        res.status(400).send("All input is required");
+        return res.json({ error: true, message: "All input is required"});
       }
 
       const oldUser = await connection.manager
@@ -107,12 +107,11 @@ createConnection().then(async (connection) => {
         .findOne({ email });
 
       if (oldUser) {
-        return res.status(409).send("User Already Exist. Please Login");
+        return res.json({ error: true, message: "User Already Exist. Please Login"});
       }
 
       const encryptedPassword = await bcrypt.hash(password, 10);
 
-      // Create user in our database
       const user = await connection.manager.getRepository(User).create({
         firstName,
         lastName,
@@ -120,20 +119,17 @@ createConnection().then(async (connection) => {
         password: encryptedPassword,
       });
 
-      // Create token
       const token = jwt.sign(
         { userId: user.id, email },
         process.env.TOKEN_KEY,
         { expiresIn: "2h" }
       );
-      // save user token
       user.token = token;
       user.created = new Date();
       user.lastLogin = new Date();
 
       await connection.manager.getRepository(User).save(user);
 
-      // return new user
       res.status(201).json(user);
     } catch (err) {
       console.log(err);
@@ -145,7 +141,7 @@ createConnection().then(async (connection) => {
       const { email, password } = req.body;
 
       if (!(email && password)) {
-        res.status(400).send("All input is required");
+        return res.json({ error: true, message: "All input is required"});
       }
       const user = await connection.manager
         .getRepository(User)
@@ -165,7 +161,7 @@ createConnection().then(async (connection) => {
         // user
         res.status(200).json(user);
       }
-      res.status(400).send("Invalid Credentials");
+      res.json({ error: true, message: "Invalid Credentials"});
     } catch (err) {
       console.log(err);
     }
@@ -215,7 +211,87 @@ createConnection().then(async (connection) => {
       relations: ['playlists']
     });  
 
-    res.json({ playlists: user.playlists });
+    res.json({ playlists: user.playlists, success: true });
+  });
+
+  app.get("/playlist/:id", auth, async (req, res) => {
+    const playlist = await connection.manager.findOne(Playlist, {
+      where: { id: req.params.id },
+      relations: ['songs']
+    });  
+
+    res.json({ songs: playlist.songs, success: true });
+  });
+
+  app.post("/playlist/add-song", auth, async (req, res) => {
+    const playlist = await connection.manager.findOne(Playlist, {
+      where: { id: req.body.playlistId },
+      relations: ['songs']
+    });
+
+    let song = await connection.manager.findOne(Song, {
+      where: { id: req.body.track.uri },
+    });
+
+    if (!song) {
+      const { track } = req.body;
+      song = new Song();
+      song.artist = track.artist;
+      song.id = track.uri;
+      song.title = track.title;
+      song.albumUrl = track.albumUrl;
+      song.created = new Date();
+      await connection.manager.save(song);
+    }
+
+    playlist.songs.push(song);
+    await connection.manager.save(playlist);
+
+    res.json({ success: true, message: 'Song added to playlist' });
+  });
+
+  app.post("/playlist/remove-song/:id", auth, async (req, res) => {
+    const playlist = await connection.manager.findOne(Playlist, {
+      where: { id: req.body.playlistId },
+      relations: ['songs']
+    });
+
+    playlist.songs = playlist.songs.filter((song) => song.id !== req.body.track.uri);
+    await connection.manager.save(playlist);
+
+    res.json({ success: true, message: 'Song added to playlist' });
+  });
+
+  app.get("/playlist/delete/:id", auth, async (req, res) => {
+    const playlist = await connection.manager.findOne(Playlist, {
+      where: { id: req.params.id },
+      relations: ['user'],
+    });  
+
+    if (req.user.user_id === playlist.user.id) {
+      await connection.manager.remove(Playlist, playlist);
+      res.json({ success: true, message: `Playlist ${playlist.name} deleted successfully` });
+    };
+
+    res.json({ success: false, message: `You don't own ${playlist.name} Playlist` });
+  });
+
+  /****************************************************
+   *  Song Routes
+   ***************************************************/
+
+   app.get("/playlist/delete/:id", auth, async (req, res) => {
+    const playlist = await connection.manager.findOne(Playlist, {
+      where: { id: req.params.id },
+      relations: ['user'],
+    });  
+
+    if (req.user.user_id === playlist.user.id) {
+      await connection.manager.remove(Playlist, playlist);
+      res.json({ success: true, message: `Playlist ${playlist.name} deleted successfully` });
+    };
+
+    res.json({ success: false, message: `You don't own ${playlist.name} Playlist` });
   });
 
   app.listen(4000, () => {

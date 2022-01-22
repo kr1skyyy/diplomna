@@ -11,7 +11,7 @@ export const createSpotifyApiUrl = (path) => {
   return `${BACKEND_URL}/spotifyapi/${path}`;
 };
 
-export const fetch = (url, obj = {}, method = "GET") => {
+export const fetch = async (url, obj = {}, method = "GET") => {
   const token = getToken();
   const headers = { "Content-Type": "application/json" };
   if (token) headers["x-access-token"] = token;
@@ -19,12 +19,15 @@ export const fetch = (url, obj = {}, method = "GET") => {
   const settings = { method, headers };
   if (method === "POST") settings.body = JSON.stringify(obj);
 
-  return window.fetch(url, settings).then((res) => res.json()).finally(showMsg);
+  const json = await window.fetch(url, settings).then((res) => res.json());
+  showMsg(json);
+
+  return json;
 };
 
 export const getToken = () => {
   const user = window.localStorage.getItem("auth");
-  if (!user) return undefined;
+  if (!user) return '';
 
   return JSON.parse(user).token;
 };
@@ -34,6 +37,8 @@ export const saveAuth = (obj) => {
 };
 
 export const showMsg = (resp) => {
+  if (!resp || (resp.success && !resp.message)) return;
+
   const msg = (
     <Stack style={{ position: 'fixed', top: 40, right: 25, zIndex: 999999999 }} spacing={2}>
       <Alert severity={resp?.success ? "success" : 'error'}>{resp?.message || 'Unknown Action, probably an error'}</Alert>

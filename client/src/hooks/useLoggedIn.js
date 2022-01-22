@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react"
-import { createUrl, fetch } from '../util/utils';
+import { createUrl, fetch, getToken } from '../util/utils';
 
 export default function useLoggedIn(setIsLoading) {
-  const auth = window.localStorage.getItem('auth');
-  const [token] = useState(JSON.parse(auth).token);
+  const token = getToken()
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {

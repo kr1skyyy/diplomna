@@ -7,8 +7,11 @@ import TrackSearchResult from './TrackSearchResult';
 import SpotifyWebApi from 'spotify-web-api-node';
 import Drawer from './layout/Drawer';
 import MyPlaylists from './pages/playlist/MyPlaylists';
+import Songs from './pages/songs/Songs';
+import GenreDetails from './pages/songs/GenreDetails';
+import PlaylistDetails from './pages/playlist/PlaylistDetails';
 
-const spotifyApi = new SpotifyWebApi({
+export const spotifyApi = new SpotifyWebApi({
   clientId: '2736f0fba5bd47febe645ba84dc7fa05',
 });
 
@@ -18,6 +21,11 @@ export default function Dashboard({ code }) {
   const [searchResults, setSearchResults] = useState([]);
   const [playingTrack, setPlayingTrack] = useState();
   const [message, setMessage] = useState(null);
+
+  document.addEventListener('play-track', (e) => {
+    const { song } = e.detail;
+    setPlayingTrack(song);
+  });
 
   document.addEventListener('show-message', (e) => {
     const msg = e.detail.msg;
@@ -29,7 +37,7 @@ export default function Dashboard({ code }) {
   })
 
   function chooseTrack(track) {
-    setPlayingTrack(track);
+    document.dispatchEvent(new CustomEvent('play-track', { detail: { song: track } }));
     setSearch('');
   }
 
@@ -76,6 +84,15 @@ export default function Dashboard({ code }) {
           <Route path="/MyPlaylists">
             <MyPlaylists/>
           </Route>
+          <Route path="/playlist/:id">
+            <PlaylistDetails />
+          </Route>
+          <Route path="/Songs">
+            <Songs/>
+          </Route>
+          <Route path="/Genres/:genre">
+            <GenreDetails />
+          </Route>
           <Route path="/">
             <Form.Control
               type='search'
@@ -96,7 +113,7 @@ export default function Dashboard({ code }) {
         </Switch>
       </Drawer>
       <div className="d-flex align-items-center" style={{ position: 'absolule', bottom: 0, height: 100, padding: '0 20px' }}>
-        <Player accessToken={accessToken} trackUri={playingTrack?.uri} />
+        <Player accessToken={accessToken} trackUri={playingTrack?.uri || playingTrack?.id} />
       </div>
     </>
   )

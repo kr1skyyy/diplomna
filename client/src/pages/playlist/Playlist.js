@@ -1,8 +1,7 @@
 import * as React from 'react';
+import { useHistory } from 'react-router-dom';
 
-import { createUrl, fetch, showMsg } from "../../util/utils";
-
-import { styled } from '@mui/material/styles';
+import { createUrl, fetch } from "../../util/utils";
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardActions from '@mui/material/CardActions';
@@ -13,15 +12,20 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export default function Playlist({ playlist }) {
+export default function Playlist({ playlist, removePlaylist }) {
   const { name, id, created } = playlist;
+  const history = useHistory();
 
-  const deleteSong = () => {
-    const response = fetch(createUrl(`playlist/delete?id=${id}`));
-  }
+  const openPlaylist = () => {
+    history.push(`/playlist/${id}`);
+  };
+
+  const deletePlaylist = () => {
+    fetch(createUrl(`playlist/delete/${id}`)).then(() => removePlaylist(id));
+  };
 
   return (
-    <Card sx={{ maxWidth: 345 }}>
+    <Card sx={{ maxWidth: 345 }} onClick={openPlaylist}>
       <CardHeader
         avatar={
           <Avatar sx={{ bgcolor: red[500] }} aria-label="playlist">
@@ -44,7 +48,7 @@ export default function Playlist({ playlist }) {
         <IconButton aria-label="share">
           <ShareIcon />
         </IconButton>
-        <IconButton aria-label="delete" onClick={deleteSong}>
+        <IconButton aria-label="delete" onClick={deletePlaylist}>
           <DeleteIcon />
         </IconButton>
       </CardActions>

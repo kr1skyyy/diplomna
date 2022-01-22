@@ -1,16 +1,19 @@
-import {Entity, Column, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
+import {Entity, Column, ManyToMany, PrimaryColumn} from "typeorm";
 import { Playlist } from './Playlist';
 
 @Entity()
 export class Song {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id: string;
 
     @Column()
     artist: string;
 
     @Column()
-    name: string;
+    title: string;
+
+    @Column()
+    albumUrl: string;
 
     // @Column({ array: true })
     // tags: string[];

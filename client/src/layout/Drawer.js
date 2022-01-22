@@ -49,6 +49,16 @@ export default function SidebarDrawer({ children }) {
                   </ListItem>
               </Link>
           </List>
+          <List>
+              <Link to="/Songs">
+                  <ListItem button >
+                      <ListItemIcon>
+                          <InboxIcon />
+                      </ListItemIcon>
+                      <ListItemText primary={"Songs"} />
+                  </ListItem>
+              </Link>
+          </List>
           <Divider />
           <List>
             {['All mail', 'Trash', 'Spam'].map((text, index) => (

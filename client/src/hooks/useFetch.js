@@ -21,5 +21,5 @@ export default function useFetch(endpoint, obj = {}, method = 'GET', dependencie
     callbackMemoized();
   }, [callbackMemoized]);
 
-  return { loading, error, value }
+  return { loading, error, value, setValue }
 }
