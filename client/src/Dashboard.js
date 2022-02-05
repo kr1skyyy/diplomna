@@ -10,6 +10,7 @@ import MyPlaylists from './pages/playlist/MyPlaylists';
 import Songs from './pages/songs/Songs';
 import GenreDetails from './pages/songs/GenreDetails';
 import PlaylistDetails from './pages/playlist/PlaylistDetails';
+import Home from './pages/Home';
 
 export const spotifyApi = new SpotifyWebApi({
   clientId: '2736f0fba5bd47febe645ba84dc7fa05',
@@ -100,6 +101,7 @@ export default function Dashboard({ code }) {
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
+            {!search && <Home />}
             <div className='flex-grow-1 my-2' style={{ overflowY: 'auto' }}>
               {searchResults.map(track => (
                 <TrackSearchResult

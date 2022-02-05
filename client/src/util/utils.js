@@ -32,6 +32,13 @@ export const getToken = () => {
   return JSON.parse(user).token;
 };
 
+export const getUser = () => {
+  const user = window.localStorage.getItem("auth");
+  if (!user) return {};
+
+  return JSON.parse(user);
+};
+
 export const saveAuth = (obj) => {
   window.localStorage.setItem("auth", JSON.stringify(obj));
 };

@@ -10,13 +10,18 @@ import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import HomeIcon from '@mui/icons-material/Home';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Link } from "react-router-dom";
+import { getUser } from '../util/utils';
 
 const drawerWidth = 240;
 
 export default function SidebarDrawer({ children }) {
+  const user = getUser();
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -24,7 +29,7 @@ export default function SidebarDrawer({ children }) {
         <Toolbar>
             <Link to="/">
                 <Typography variant="h6" noWrap component="div">
-                    Home
+                  DiplomnaMusicApp
                 </Typography>
             </Link>
         </Toolbar>
@@ -40,10 +45,20 @@ export default function SidebarDrawer({ children }) {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
+              <Link to="/">
+                  <ListItem button >
+                      <ListItemIcon>
+                        <HomeIcon />
+                      </ListItemIcon>
+                      <ListItemText primary={"Home"} />
+                  </ListItem>
+              </Link>
+          </List>
+          <List>
               <Link to="/MyPlaylists">
                   <ListItem button >
                       <ListItemIcon>
-                          <InboxIcon />
+                          <LibraryMusicIcon />
                       </ListItemIcon>
                       <ListItemText primary={"My Playlists"} />
                   </ListItem>
@@ -53,22 +68,20 @@ export default function SidebarDrawer({ children }) {
               <Link to="/Songs">
                   <ListItem button >
                       <ListItemIcon>
-                          <InboxIcon />
+                          <MusicNoteIcon />
                       </ListItemIcon>
-                      <ListItemText primary={"Songs"} />
+                      <ListItemText primary={"All Songs"} />
                   </ListItem>
               </Link>
           </List>
           <Divider />
           <List>
-            {['All mail', 'Trash', 'Spam'].map((text, index) => (
-              <ListItem button key={text}>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            ))}
+            <ListItem>
+              <ListItemIcon>
+                <AccountCircleIcon />
+              </ListItemIcon>
+              <ListItemText primary={user.firstName + ' ' + user.lastName} />
+            </ListItem>
           </List>
         </Box>
       </Drawer>

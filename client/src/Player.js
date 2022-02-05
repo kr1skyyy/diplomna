@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react"
 import SpotifyPlayer from "react-spotify-web-playback"
+import { createUrl, fetch } from "./util/utils"
 
 export default function Player({ accessToken, trackUri }) {
   const [play, setPlay] = useState(false)
+  const [requestInProgress, setRequestInProgress] = useState(false);
 
   useEffect(() => setPlay(true), [trackUri])
 
@@ -10,9 +12,15 @@ export default function Player({ accessToken, trackUri }) {
   return (
     <SpotifyPlayer
       token={accessToken}
-      showSaveIcon
       callback={state => {
         if (!state.isPlaying) setPlay(false)
+        if (state.position.toFixed(2) === '0.00' && state.isPlaying && !requestInProgress) {
+          setRequestInProgress(true);
+          fetch(createUrl('chart/user-plays/'), state.track, 'POST')
+            .finally(() => {
+              setRequestInProgress(false);
+            });
+        }
       }}
       play={play}
       uris={trackUri ? [trackUri] : []}

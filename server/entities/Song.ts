@@ -1,6 +1,5 @@
 import {Entity, Column, ManyToMany, PrimaryColumn} from "typeorm";
-import { Playlist } from './Playlist';
-
+import { Chart } from "./index";
 @Entity()
 export class Song {
     @PrimaryColumn()
@@ -14,6 +13,9 @@ export class Song {
 
     @Column()
     albumUrl: string;
+
+    @ManyToMany(type => Chart, chart => chart.songs)
+    charts: Chart[]
 
     // @Column({ array: true })
     // tags: string[];

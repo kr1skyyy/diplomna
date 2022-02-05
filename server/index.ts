@@ -2,7 +2,8 @@ require("dotenv").config();
 import "reflect-metadata";
 import auth from "./middleware/auth";
 import { createConnection } from "typeorm";
-import { User, Playlist, Song } from "./entities/index";
+import { User, Playlist, Song, Chart, SongListened } from "./entities/index";
+import getAllCharts from "./scripts/helpers/dateHelpers";
 
 const express = require("express");
 const cors = require("cors");
@@ -60,6 +61,7 @@ createConnection().then(async (connection) => {
         res.json({
           accessToken: data.body.accessToken,
           expiresIn: data.body.expiresIn,
+          success: true,
         });
       })
       .catch((err) => {
@@ -83,6 +85,7 @@ createConnection().then(async (connection) => {
           accessToken: data.body.access_token,
           refreshToken: data.body.refresh_token,
           expiresIn: data.body.expires_in,
+          success: true,
         });
       })
       .catch((err) => {
@@ -145,7 +148,7 @@ createConnection().then(async (connection) => {
       }
       const user = await connection.manager
         .getRepository(User)
-        .findOne({ email });
+        .findOne({ email }) as User & Record<string, any>;
 
       if (user && (await bcrypt.compare(password, user.password))) {
         // Create token
@@ -157,9 +160,11 @@ createConnection().then(async (connection) => {
 
         // save user token
         user.token = token;
+        user.success = true;
 
         // user
         res.status(200).json(user);
+        return;
       }
       res.json({ error: true, message: "Invalid Credentials"});
     } catch (err) {
@@ -178,7 +183,7 @@ createConnection().then(async (connection) => {
   });
 
   app.post("/session-alive", auth, (_, res) => {
-    res.status(200).json({ authenticated: true });
+    res.status(200).json({ authenticated: true, success: true });
   });
 
   /****************************************************
@@ -220,7 +225,7 @@ createConnection().then(async (connection) => {
       relations: ['songs']
     });  
 
-    res.json({ songs: playlist.songs, success: true });
+    res.json({ songs: playlist ? playlist.songs : [], success: true });
   });
 
   app.post("/playlist/add-song", auth, async (req, res) => {
@@ -271,6 +276,7 @@ createConnection().then(async (connection) => {
     if (req.user.user_id === playlist.user.id) {
       await connection.manager.remove(Playlist, playlist);
       res.json({ success: true, message: `Playlist ${playlist.name} deleted successfully` });
+      return;
     };
 
     res.json({ success: false, message: `You don't own ${playlist.name} Playlist` });
@@ -289,9 +295,69 @@ createConnection().then(async (connection) => {
     if (req.user.user_id === playlist.user.id) {
       await connection.manager.remove(Playlist, playlist);
       res.json({ success: true, message: `Playlist ${playlist.name} deleted successfully` });
+      return;
     };
 
     res.json({ success: false, message: `You don't own ${playlist.name} Playlist` });
+  });
+
+
+  /****************************************************
+   *  Chart Routes
+   ***************************************************/
+
+  app.post('/chart/user-plays/', auth, async (req, res) => {
+    let song = await connection.manager.findOne(Song, {
+      where: { id: req.body.uri },
+    });
+
+    if (!song) {
+      const track = req.body;
+      song = new Song();
+      song.artist = track.artists;
+      song.id = track.uri;
+      song.title = track.title || track.name;
+      song.albumUrl = track.image;
+      song.created = new Date();
+      await connection.manager.save(song);
+    }
+    
+    getAllCharts().forEach(async ({ id, from, to, name }) => {
+      let chart = await connection.manager.findOne(Chart, {
+        where: { id },
+        relations: ['songs'],
+      });
+
+      if (!chart) {
+        chart = new Chart();
+        chart.name = name;
+        chart.id = id;
+        chart.from = from;
+        chart.to = to;
+        chart.songs = [song];
+      } else if (chart.songs.indexOf(song) === -1) {
+        chart.songs.push(song);
+      }
+
+      await connection.manager.save(Chart, chart);
+
+      let songListened = await connection.manager.findOne(SongListened, {
+        where: { chartId: chart.id, songId: song.id },
+      });
+
+      if (!songListened) {
+        songListened = new SongListened();
+        songListened.chartId = chart.id;
+        songListened.songId = song.id;
+        songListened.listened = 0;
+      }
+
+      songListened.listened += 1;
+
+      await connection.manager.save(SongListened, songListened);
+    });
+
+    res.json({ success: true });
   });
 
   app.listen(4000, () => {
