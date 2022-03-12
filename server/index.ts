@@ -3,7 +3,7 @@ import "reflect-metadata";
 import auth from "./middleware/auth";
 import { createConnection } from "typeorm";
 import { User, Playlist, Song, Chart, SongListened } from "./entities/index";
-import getAllCharts from "./scripts/helpers/dateHelpers";
+import getAllCharts, { getWeekChart } from "./scripts/helpers/dateHelpers";
 
 const express = require("express");
 const cors = require("cors");
@@ -344,15 +344,16 @@ createConnection({
       song.created = new Date();
       await connection.manager.save(song);
     }
+
+    const allCharts = getAllCharts();
     
-    getAllCharts().forEach(async ({ id, from, to, name }) => {
+    for (let currentChart of allCharts) {
+      let { id, from, to, name } = currentChart;
+
       let chart = await connection.manager.findOne(Chart, {
         where: { id },
         relations: ['songs'],
       });
-
-      console.log(chart);
-      
 
       if (!chart) {
         chart = new Chart();
@@ -365,13 +366,7 @@ createConnection({
         chart.songs.push(song);
       }
 
-      try {
-        let saved = await connection.manager.save(Chart, chart);
-        let c = '1';
-      } catch (e) {
-        let a = e;
-        let b = '';
-      }
+      await connection.manager.save(Chart, chart);
 
       let songListened = await connection.manager.findOne(SongListened, {
         where: { chartId: chart.id, songId: song.id },
@@ -385,17 +380,36 @@ createConnection({
       }
 
       songListened.listened += 1;
-
-      try {
-        let h = await connection.manager.save(SongListened, songListened);
-        let fg = '';
-      } catch (e) {
-        let asd = e;
-        let asdasd = '1';
-      }
-    });
+      
+      let a = await connection.manager.save(SongListened, songListened);
+      let b = 'a';
+    };
 
     res.json({ success: true });
+  });
+
+  app.get('/chart/weekly', auth, async (req, res) => {
+    const { id } = getWeekChart(new Date());
+
+    let chart = await connection.manager.findOne(Chart, { where: { id } });
+
+    if (!chart) return res.json({ songs: [], success: true });
+
+    const songs = [];
+    let songListened = await connection.manager.find(SongListened, { where: { chartId: chart.id } });
+
+    for (let { songId } of songListened) {
+      let song = await connection.manager.findOne(Song, { where: { id: songId } });
+      if (song) songs.push(song);
+    }
+
+    res.json({ songs: songs, success: true });
+  });
+
+  app.get('/chart/monthly', auth, async (req, res) => {
+  });
+
+  app.get('/chart/yearly', auth, async (req, res) => {
   });
 
   app.listen(4000, () => {

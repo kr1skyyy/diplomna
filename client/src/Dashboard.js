@@ -10,6 +10,8 @@ import MyPlaylists from './pages/playlist/MyPlaylists';
 import Songs from './pages/songs/Songs';
 import GenreDetails from './pages/songs/GenreDetails';
 import PlaylistDetails from './pages/playlist/PlaylistDetails';
+import Charts from './pages/charts/Charts';
+import Chart from './pages/charts/Chart';
 import Home from './pages/Home';
 
 export const spotifyApi = new SpotifyWebApi({
@@ -94,6 +96,12 @@ export default function Dashboard({ code }) {
           <Route path="/Genres/:genre">
             <GenreDetails />
           </Route>
+          <Route path="/Charts/:chart">
+            <Chart />
+          </Route>
+          <Route path="/Charts">
+            <Charts />
+          </Route>
           <Route path="/">
             <Form.Control
               type='search'
@@ -102,7 +110,7 @@ export default function Dashboard({ code }) {
               onChange={e => setSearch(e.target.value)}
             />
             {!search && <Home />}
-            <div className='flex-grow-1 my-2' style={{ overflowY: 'auto' }}>
+            <div className='flex-grow-1 my-2'>
               {searchResults.map(track => (
                 <TrackSearchResult
                   track={track}

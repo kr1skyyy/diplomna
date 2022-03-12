@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useHistory } from "react-router-dom";
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -16,8 +15,6 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 const theme = createTheme();
 
 const Fields = ({ isSignIn, setIsSignIn, isLogged, setIsLogged }) => {
-  const history = useHistory();
-
     const handleSubmit = async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);

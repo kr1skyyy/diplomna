@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -42,9 +43,11 @@ export default function Home() {
               </Button>
             </Grid>
             <Grid item>
-              <Button variant="outlined" color="primary">
-                Check music genres
-              </Button>
+              <Link to="/Songs">
+                <Button variant="outlined" color="primary">
+                  Check music genres
+                </Button>
+              </Link>
             </Grid>
           </Grid>
         </div>
