@@ -13,11 +13,11 @@ export class Chart {
     @JoinTable({
       name: 'song_listened',
       joinColumn: {
-        name: 'songId',
+        name: 'chartId',
         referencedColumnName: 'id',
       },
       inverseJoinColumn: {
-        name: 'chartId',
+        name: 'songId',
         referencedColumnName: 'id',
       },
     })

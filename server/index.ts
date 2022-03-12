@@ -21,7 +21,30 @@ app.use(
   })
 );
 
-createConnection().then(async (connection) => {
+createConnection({
+  type: "mysql",
+  host: "localhost",
+  port: 3306,
+  username: "root",
+  password: "root",
+  database: "diplomna_db",
+  synchronize: true,
+  logging: false,
+  entities: [
+    __dirname + "/entities/**.*"
+  ],
+  migrations: [
+    "migration/**/*.ts"
+  ],
+  subscribers: [
+    "subscriber/**/*.ts"
+  ],
+  cli: {
+    entitiesDir: "entities",
+    migrationsDir: "migration",
+    subscribersDir: "subscriber"
+  }
+}).then(async (connection) => {
   // const song1 = new Song();
   // song1.name = "animals";
   // song1.artist = 'art';
@@ -328,6 +351,9 @@ createConnection().then(async (connection) => {
         relations: ['songs'],
       });
 
+      console.log(chart);
+      
+
       if (!chart) {
         chart = new Chart();
         chart.name = name;
@@ -339,7 +365,13 @@ createConnection().then(async (connection) => {
         chart.songs.push(song);
       }
 
-      await connection.manager.save(Chart, chart);
+      try {
+        let saved = await connection.manager.save(Chart, chart);
+        let c = '1';
+      } catch (e) {
+        let a = e;
+        let b = '';
+      }
 
       let songListened = await connection.manager.findOne(SongListened, {
         where: { chartId: chart.id, songId: song.id },
@@ -354,7 +386,13 @@ createConnection().then(async (connection) => {
 
       songListened.listened += 1;
 
-      await connection.manager.save(SongListened, songListened);
+      try {
+        let h = await connection.manager.save(SongListened, songListened);
+        let fg = '';
+      } catch (e) {
+        let asd = e;
+        let asdasd = '1';
+      }
     });
 
     res.json({ success: true });

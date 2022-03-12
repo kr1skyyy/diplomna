@@ -45,6 +45,15 @@ export default function SidebarDrawer({ children }) {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
+            <ListItem>
+              <ListItemIcon>
+                <AccountCircleIcon />
+              </ListItemIcon>
+              <ListItemText primary={user.firstName + ' ' + user.lastName} />
+            </ListItem>
+          </List>
+          <Divider />
+          <List>
               <Link to="/">
                   <ListItem button >
                       <ListItemIcon>
@@ -73,15 +82,6 @@ export default function SidebarDrawer({ children }) {
                       <ListItemText primary={"All Songs"} />
                   </ListItem>
               </Link>
-          </List>
-          <Divider />
-          <List>
-            <ListItem>
-              <ListItemIcon>
-                <AccountCircleIcon />
-              </ListItemIcon>
-              <ListItemText primary={user.firstName + ' ' + user.lastName} />
-            </ListItem>
           </List>
         </Box>
       </Drawer>

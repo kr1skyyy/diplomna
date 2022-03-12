@@ -45,7 +45,7 @@ export const getWeekChart = (today) => {
   };
 };
 
-export const getMongthChart = (today) => {
+export const getMonthChart = (today) => {
   return {
     id: `${today.getMonth() + 1}month${today.getFullYear()}`,
     name: `Month ${today.getMonth() + 1} top chart`,
@@ -67,7 +67,7 @@ export default function getCharts() {
   const today = new Date();
 
   const weekChart = getWeekChart(today);
-  const monthChart = getMongthChart(today);
+  const monthChart = getMonthChart(today);
   const yearChart = getYearChart(today);
 
   return [weekChart, monthChart, yearChart];
