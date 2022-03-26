@@ -18,7 +18,7 @@ export class Song {
     // @ManyToMany(type => Chart, chart => chart.songs)
     // charts: Chart[]
 
-    @OneToMany(() => SongListened, songListened => songListened.chartId)
+    @OneToMany(() => SongListened, songListened => songListened.chart)
     charts: Chart[]
 
     // @Column({ array: true })

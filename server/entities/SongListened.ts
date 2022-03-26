@@ -10,11 +10,11 @@ export class SongListened {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => Chart, (chart) => chart.songs)
-    songId: string;
+    @ManyToOne(() => Chart, (chart) => chart.songs, { createForeignKeyConstraints: false })
+    song: string;
     
-    @ManyToOne(() => Song, (song) => song.charts)
-    chartId: string;
+    @ManyToOne(() => Song, (song) => song.charts, { createForeignKeyConstraints: false })
+    chart: string;
 
     // @PrimaryColumn()
     // songId: string;

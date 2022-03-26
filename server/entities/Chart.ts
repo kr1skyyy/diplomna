@@ -24,7 +24,7 @@ export class Chart {
     // })
     // songs?: Song[];
 
-    @OneToMany(() => SongListened, (songListened) => songListened.songId)
+    @OneToMany(() => SongListened, (songListened) => songListened.song)
     songs?: Song[];
 
     @Column({type: 'date'})

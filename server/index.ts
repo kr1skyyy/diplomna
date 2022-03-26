@@ -3,7 +3,7 @@ import "reflect-metadata";
 import auth from "./middleware/auth";
 import { createConnection } from "typeorm";
 import { User, Playlist, Song, Chart, SongListened } from "./entities/index";
-import getAllCharts, { getWeekChart } from "./scripts/helpers/dateHelpers";
+import getAllCharts, { getChartByChartType } from "./scripts/helpers/dateHelpers";
 
 const express = require("express");
 const cors = require("cors");
@@ -45,26 +45,6 @@ createConnection({
     subscribersDir: "subscriber"
   }
 }).then(async (connection) => {
-  // const song1 = new Song();
-  // song1.name = "animals";
-  // song1.artist = 'art';
-  // song1.created = new Date();
-  // await connection.manager.save(song1);
-
-  // const song2 = new Song();
-  // song2.name = "zoo";
-  // song2.artist = 'art';
-  // song2.created = new Date();
-  // await connection.manager.save(song2);
-
-  // const playlist = new Playlist();
-  // playlist.created = new Date();
-  // playlist.user = 'asd';
-  // playlist.name = 'asd';
-  // playlist.modified = new Date();
-  // playlist.songs = [song1, song2];
-  // await connection.manager.save(playlist);
-
   /****************************************************
    *  Spotify API Routes
    ***************************************************/
@@ -217,7 +197,7 @@ createConnection({
     const { name } = req.query;
     try {
       const user = await connection.manager.findOne(User, {
-        where: { id: req.user.user_id },
+        where: { email: req.user.email },
       });  
   
       const playlist = new Playlist();
@@ -235,11 +215,13 @@ createConnection({
 
   app.get("/playlist/current-user", auth, async (req, res) => {
     const user = await connection.manager.findOne(User, {
-      where: { id: req.user.user_id },
+      where: { email: req.user.email },
       relations: ['playlists']
     });  
 
-    res.json({ playlists: user.playlists, success: true });
+    const playlist = user && user.playlists ? user.playlists : [];
+
+    res.json({ playlists: playlist, success: true });
   });
 
   app.get("/playlist/:id", auth, async (req, res) => {
@@ -258,7 +240,7 @@ createConnection({
     });
 
     let song = await connection.manager.findOne(Song, {
-      where: { id: req.body.track.uri },
+      where: { id: (req.body.track.uri || req.body.track.id) },
     });
 
     if (!song) {
@@ -361,56 +343,52 @@ createConnection({
         chart.id = id;
         chart.from = from;
         chart.to = to;
-        chart.songs = [song];
-      } else if (chart.songs.indexOf(song) === -1) {
-        chart.songs.push(song);
       }
 
       await connection.manager.save(Chart, chart);
 
       let songListened = await connection.manager.findOne(SongListened, {
-        where: { chartId: chart.id, songId: song.id },
+        where: { chart: chart.id, song: song.id },
       });
 
       if (!songListened) {
         songListened = new SongListened();
-        songListened.chartId = chart.id;
-        songListened.songId = song.id;
+        songListened.chart = chart.id;
+        songListened.song = song.id;
         songListened.listened = 0;
       }
 
       songListened.listened += 1;
       
-      let a = await connection.manager.save(SongListened, songListened);
-      let b = 'a';
+      await connection.manager.save(SongListened, songListened);
     };
 
     res.json({ success: true });
   });
 
-  app.get('/chart/weekly', auth, async (req, res) => {
-    const { id } = getWeekChart(new Date());
-
-    let chart = await connection.manager.findOne(Chart, { where: { id } });
-
-    if (!chart) return res.json({ songs: [], success: true });
-
-    const songs = [];
-    let songListened = await connection.manager.find(SongListened, { where: { chartId: chart.id } });
-
-    for (let { songId } of songListened) {
-      let song = await connection.manager.findOne(Song, { where: { id: songId } });
-      if (song) songs.push(song);
-    }
-
-    res.json({ songs: songs, success: true });
-  });
-
-  app.get('/chart/monthly', auth, async (req, res) => {
-  });
-
-  app.get('/chart/yearly', auth, async (req, res) => {
-  });
+  ['weekly', 'monthly', 'yearly'].forEach((chartType) => {
+    app.get(`/chart/${chartType}`, auth, async (req, res) => {
+      const { id } = getChartByChartType(chartType, new Date());
+  
+      let chart = await connection.manager.findOne(Chart, { where: { id } });
+  
+      if (!chart) return res.json({ songs: [], success: true });
+  
+      const songs = [];
+      let songsListened = await connection.manager.find(SongListened, {
+        where: { chart: chart.id },
+        loadRelationIds: true,
+        relations: ['song']
+      });
+  
+      for (const songListened of songsListened) {
+        let song = await connection.manager.findOne(Song, { where: { id: songListened.song } });
+        if (song) songs.push(song);
+      }
+  
+      res.json({ songs: songs, success: true });
+    });
+  })
 
   app.listen(4000, () => {
     console.log("Running on port 4000");

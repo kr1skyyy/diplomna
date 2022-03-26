@@ -11,13 +11,13 @@ export const createSpotifyApiUrl = (path) => {
   return `${BACKEND_URL}/spotifyapi/${path}`;
 };
 
-export const fetch = async (url, obj = {}, method = "GET") => {
+export const fetch = async (url, obj = {}, method = 'GET') => {
   const token = getToken();
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers["x-access-token"] = token;
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['x-access-token'] = token;
 
   const settings = { method, headers };
-  if (method === "POST") settings.body = JSON.stringify(obj);
+  if (method === 'POST') settings.body = JSON.stringify(obj);
 
   const json = await window.fetch(url, settings).then((res) => res.json());
   showMsg(json);
@@ -26,29 +26,31 @@ export const fetch = async (url, obj = {}, method = "GET") => {
 };
 
 export const getToken = () => {
-  const user = window.localStorage.getItem("auth");
+  const user = window.localStorage.getItem('auth');
   if (!user) return '';
 
   return JSON.parse(user).token;
 };
 
 export const getUser = () => {
-  const user = window.localStorage.getItem("auth");
+  const user = window.localStorage.getItem('auth');
   if (!user) return {};
 
   return JSON.parse(user);
 };
 
 export const saveAuth = (obj) => {
-  window.localStorage.setItem("auth", JSON.stringify(obj));
+  window.localStorage.setItem('auth', JSON.stringify(obj));
 };
+
+export const logout = () => window.localStorage.removeItem('auth');
 
 export const showMsg = (resp) => {
   if (!resp || (resp.success && !resp.message)) return;
 
   const msg = (
     <Stack style={{ position: 'fixed', top: 40, right: 25, zIndex: 999999999 }} spacing={2}>
-      <Alert severity={resp?.success ? "success" : 'error'}>{resp?.message || 'Unknown Action, probably an error'}</Alert>
+      <Alert severity={resp?.success ? 'success' : 'error'}>{resp?.message || 'Unknown Action, probably an error'}</Alert>
     </Stack>
   );
 

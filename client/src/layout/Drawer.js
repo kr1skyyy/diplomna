@@ -23,6 +23,7 @@ const drawerWidth = 240;
 
 export default function SidebarDrawer({ children }) {
   const user = getUser();
+  const logout = () => document.dispatchEvent(new CustomEvent('logout'));
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -98,14 +99,12 @@ export default function SidebarDrawer({ children }) {
 
             <Divider />
             
-            <Link to="/Logout">
-              <ListItem button>
-                <ListItemIcon>
-                  <ExitIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Logout"} />
-              </ListItem>
-            </Link>
+            <ListItem button onClick={logout}>
+              <ListItemIcon>
+                <ExitIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Logout"} />
+            </ListItem>
           </List>
         </Box>
       </Drawer>

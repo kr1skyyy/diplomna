@@ -1,3 +1,10 @@
+type Chart = {
+  id: string;
+  name: string;
+  from: Date,
+  to: Date,
+};
+
 const oneDayMilisec = 1000 * 60 * 60 * 24;
 
 export const getWeekOfYear = (date: Date): number => {
@@ -34,7 +41,7 @@ export const getEndOfMonth = (today: Date): Date => {
   return endOfMonth;
 };
 
-export const getWeekChart = (today) => {
+export const getWeekChart = (today: Date): Chart => {
   const weekDay = getWeekOfYear(today);
 
   return {
@@ -45,7 +52,7 @@ export const getWeekChart = (today) => {
   };
 };
 
-export const getMonthChart = (today) => {
+export const getMonthChart = (today: Date): Chart => {
   return {
     id: `${today.getMonth() + 1}month${today.getFullYear()}`,
     name: `Month ${today.getMonth() + 1} top chart`,
@@ -54,7 +61,7 @@ export const getMonthChart = (today) => {
   };
 };
 
-export const getYearChart = (today) => {
+export const getYearChart = (today: Date): Chart => {
   return {
     id: `${today.getFullYear()}`,
     name: `Year ${today.getFullYear()} top chart`,
@@ -63,7 +70,15 @@ export const getYearChart = (today) => {
   };
 };
 
-export default function getCharts() {
+export function getChartByChartType(chartType, date) {
+  if (chartType === 'weekly') return getWeekChart(date);
+  if (chartType === 'monthly') return getMonthChart(date);
+  if (chartType === 'yearly') return getYearChart(date);
+
+  return null;
+}
+
+export default function getCharts(): Chart[] {
   const today = new Date();
 
   const weekChart = getWeekChart(today);
