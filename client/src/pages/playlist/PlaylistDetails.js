@@ -14,7 +14,7 @@ export default function PlaylistDetails() {
   return (
     <div>
       {value.songs && value.songs.length ? (
-        value.songs.map((song) => <TrackSearchResult track={song} />)
+        value.songs.map((song, id) => <TrackSearchResult track={song} key={id} />)
       ) : (
         <h1>No songs in playlist.</h1>
       )}

@@ -12,7 +12,6 @@ export default function useAuth(code) {
         setAccessToken(res.accessToken);
         setRefreshToken(res.refreshToken);
         setExpiresIn(res.expiresIn);
-        window.history.pushState({}, null, "/");
       })
       .catch(() => {
         window.location = "/"

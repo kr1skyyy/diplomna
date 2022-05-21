@@ -213,15 +213,25 @@ createConnection({
     }
   });
 
-  app.get("/playlist/current-user", auth, async (req, res) => {
+  app.post("/playlist/current-user", auth, async (req, res) => {
     const user = await connection.manager.findOne(User, {
       where: { email: req.user.email },
       relations: ['playlists']
     });  
 
-    const playlist = user && user.playlists ? user.playlists : [];
+    const playlists = user && user.playlists ? user.playlists : [];
 
-    res.json({ playlists: playlist, success: true });
+    if (req.body.trackId) {
+      for (const i in playlists) {
+        const playlist = playlists[i];
+        const playlistWithSongs = await connection.manager.findOne(Playlist, playlist.id, { relations: ['songs'] });
+        if (playlistWithSongs) {
+          (playlists[i] as Record<string, any>).songExists = playlistWithSongs.songs.some((song) => song.id === req.body.trackId);          
+        }
+      }
+    }
+
+    res.json({ playlists, success: true });
   });
 
   app.get("/playlist/:id", auth, async (req, res) => {
@@ -260,16 +270,19 @@ createConnection({
     res.json({ success: true, message: 'Song added to playlist' });
   });
 
-  app.post("/playlist/remove-song/:id", auth, async (req, res) => {
+  app.post("/playlist/remove-song", auth, async (req, res) => {
     const playlist = await connection.manager.findOne(Playlist, {
       where: { id: req.body.playlistId },
       relations: ['songs']
     });
 
-    playlist.songs = playlist.songs.filter((song) => song.id !== req.body.track.uri);
+    const songId = req.body.track.uri || req.body.track.id;
+
+    playlist.songs = playlist.songs.filter((song) => song.id !== songId);
+    
     await connection.manager.save(playlist);
 
-    res.json({ success: true, message: 'Song added to playlist' });
+    res.json({ success: true, message: 'Song removed from playlist' });
   });
 
   app.get("/playlist/delete/:id", auth, async (req, res) => {
@@ -312,81 +325,89 @@ createConnection({
    ***************************************************/
 
   app.post('/chart/user-plays/', auth, async (req, res) => {
-    let song = await connection.manager.findOne(Song, {
-      where: { id: req.body.uri },
-    });
-
-    if (!song) {
-      const track = req.body;
-      song = new Song();
-      song.artist = track.artists;
-      song.id = track.uri;
-      song.title = track.title || track.name;
-      song.albumUrl = track.image;
-      song.created = new Date();
-      await connection.manager.save(song);
-    }
-
-    const allCharts = getAllCharts();
-    
-    for (let currentChart of allCharts) {
-      let { id, from, to, name } = currentChart;
-
-      let chart = await connection.manager.findOne(Chart, {
-        where: { id },
-        relations: ['songs'],
+    try {
+      let song = await connection.manager.findOne(Song, {
+        where: { id: req.body.uri },
       });
-
-      if (!chart) {
-        chart = new Chart();
-        chart.name = name;
-        chart.id = id;
-        chart.from = from;
-        chart.to = to;
+  
+      if (!song) {
+        const track = req.body;
+        song = new Song();
+        song.artist = track.artists;
+        song.id = track.uri;
+        song.title = track.title || track.name;
+        song.albumUrl = track.image;
+        song.created = new Date();
+        await connection.manager.save(song);
       }
-
-      await connection.manager.save(Chart, chart);
-
-      let songListened = await connection.manager.findOne(SongListened, {
-        where: { chart: chart.id, song: song.id },
-      });
-
-      if (!songListened) {
-        songListened = new SongListened();
-        songListened.chart = chart.id;
-        songListened.song = song.id;
-        songListened.listened = 0;
-      }
-
-      songListened.listened += 1;
+  
+      const allCharts = getAllCharts();
       
-      await connection.manager.save(SongListened, songListened);
-    };
-
+      for (let currentChart of allCharts) {
+        let { id, from, to, name } = currentChart;
+  
+        let chart = await connection.manager.findOne(Chart, {
+          where: { id },
+          relations: ['songs'],
+        });
+  
+        if (!chart) {
+          chart = new Chart();
+          chart.name = name;
+          chart.id = id;
+          chart.from = from;
+          chart.to = to;
+        }
+  
+        await connection.manager.save(Chart, chart);
+  
+        let songListened = await connection.manager.findOne(SongListened, {
+          where: { chart: chart.id, song: song.id },
+        });
+  
+        if (!songListened) {
+          songListened = new SongListened();
+          songListened.chart = chart.id;
+          songListened.song = song.id;
+          songListened.listened = 0;
+        }
+  
+        songListened.listened += 1;
+        
+        await connection.manager.save(SongListened, songListened);
+      };
+  
+    } catch (e) {}
+  
     res.json({ success: true });
   });
 
   ['weekly', 'monthly', 'yearly'].forEach((chartType) => {
     app.get(`/chart/${chartType}`, auth, async (req, res) => {
-      const { id } = getChartByChartType(chartType, new Date());
-  
-      let chart = await connection.manager.findOne(Chart, { where: { id } });
-  
-      if (!chart) return res.json({ songs: [], success: true });
-  
-      const songs = [];
-      let songsListened = await connection.manager.find(SongListened, {
-        where: { chart: chart.id },
-        loadRelationIds: true,
-        relations: ['song']
-      });
-  
-      for (const songListened of songsListened) {
-        let song = await connection.manager.findOne(Song, { where: { id: songListened.song } });
-        if (song) songs.push(song);
+      try {
+        const { id } = getChartByChartType(chartType, new Date());
+    
+        let chart = await connection.manager.findOne(Chart, { where: { id } });
+    
+        if (!chart) return res.json({ songs: [], success: true });
+    
+        const songs = [];
+        let songsListened = await connection.manager.find(SongListened, {
+          where: { chart: chart.id },
+          loadRelationIds: true,
+          relations: ['song']
+        });
+    
+        for (const songListened of songsListened) {
+          let song = await connection.manager.findOne(Song, { where: { id: songListened.song } });
+          (song as Record<string, any>).listened = songListened.listened;
+          if (song) songs.push(song);
+        }
+    
+        res.json({ songs: songs, success: true });
+      } catch (e) {
+        res.json({ success: false, message: `There was an error while trying to render ${chartType} chart.` })
       }
-  
-      res.json({ songs: songs, success: true });
     });
   })
 

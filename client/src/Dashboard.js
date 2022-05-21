@@ -22,13 +22,7 @@ export default function Dashboard({ code }) {
   const accessToken = useAuth(code);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [playingTrack, setPlayingTrack] = useState();
   const [message, setMessage] = useState(null);
-
-  document.addEventListener('play-track', (e) => {
-    const { song } = e.detail;
-    setPlayingTrack(song);
-  });
 
   document.addEventListener('show-message', (e) => {
     const msg = e.detail.msg;
@@ -40,7 +34,7 @@ export default function Dashboard({ code }) {
   })
 
   function chooseTrack(track) {
-    document.dispatchEvent(new CustomEvent('play-track', { detail: { song: track } }));
+    document.dispatchEvent(new CustomEvent('set-player-songs', { detail: { song: track } }));
     setSearch('');
   }
 
@@ -123,7 +117,7 @@ export default function Dashboard({ code }) {
         </Switch>
       </Drawer>
       <div className="d-flex align-items-center" style={{ position: 'absolule', bottom: 0, height: 100, padding: '0 20px' }}>
-        <Player accessToken={accessToken} trackUri={playingTrack?.uri || playingTrack?.id} />
+        <Player accessToken={accessToken} />
       </div>
     </>
   )
