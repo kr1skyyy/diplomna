@@ -1,7 +1,7 @@
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
 
-export const BACKEND_URL = "http://localhost:4000";
+export const BACKEND_URL = "https://77.78.32.18:4000";
 
 export const createUrl = (path = "") => {
   return `${BACKEND_URL}/${path}`;

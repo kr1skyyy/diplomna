@@ -11,8 +11,16 @@ const bodyParser = require("body-parser");
 const SpotifyWebApi = require("spotify-web-api-node");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const https = require('https');
+const fs = require('fs');
+
+const httpsOptions = {
+  key: fs.readFileSync('./privatekey.pem'),
+  cert: fs.readFileSync('./publiccert.pem'),
+};
 
 const app = express();
+app.use(express.static('public'));
 app.use(cors());
 app.use(bodyParser.json());
 app.use(
@@ -390,7 +398,7 @@ createConnection({
     });
   })
 
-  app.listen(4000, () => {
+  https.createServer(httpsOptions, app).listen(4000, () => {
     console.log("Running on port 4000");
   });
 });

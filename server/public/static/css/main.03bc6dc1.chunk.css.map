@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://src/style.scss"],"names":[],"mappings":"AAAA,UACI,oBAAqB,CACrB,WAAY,CACf,KAGG,aAAc","file":"main.03bc6dc1.chunk.css","sourcesContent":["a, a:hover {\r\n    text-decoration: none;\r\n    color: unset;\r\n}\r\n\r\nmain {\r\n    overflow: auto;\r\n}"]}
