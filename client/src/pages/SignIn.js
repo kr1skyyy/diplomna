@@ -15,6 +15,8 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 const theme = createTheme();
 
 const Fields = ({ isSignIn, setIsSignIn, isLogged, setIsLogged }) => {
+    const [error, setError] = React.useState(false);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -32,9 +34,14 @@ const Fields = ({ isSignIn, setIsSignIn, isLogged, setIsLogged }) => {
         const URL = createUrl(isSignIn ? 'login' : 'register');
 
         fetch(URL, user, 'POST')
-          .then(saveAuth)
-          .then(() => {
-            setIsLogged(true);
+          .then((data) => {
+            if (!data.error && data.success) {
+              saveAuth(data);
+              return setIsLogged(true);
+            }
+
+            setIsLogged(false);
+            setError(data.message);
           })
           .catch(() => {
             setIsLogged(false);
@@ -42,6 +49,7 @@ const Fields = ({ isSignIn, setIsSignIn, isLogged, setIsLogged }) => {
     };
     return (
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          { error && <h3 className="my-3 text-center" style={{ color: 'red'}}>Error: {error}</h3>}
           {isSignIn
           ? <>
               <TextField margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus />

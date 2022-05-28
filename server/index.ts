@@ -113,7 +113,7 @@ createConnection({
         .findOne({ email });
 
       if (oldUser) {
-        return res.json({ error: true, message: "User Already Exist. Please Login"});
+        return res.json({ error: true, message: "User Already Exist."});
       }
 
       const encryptedPassword = await bcrypt.hash(password, 10);
