@@ -136,7 +136,7 @@ createConnection({
 
       await connection.manager.getRepository(User).save(user);
 
-      res.status(201).json(user);
+      res.status(201).json({ ...user, success: true, error: false });
     } catch (err) {
       console.log(err);
     }

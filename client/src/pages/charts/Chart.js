@@ -42,7 +42,7 @@ export default function Chart() {
           .sort((a, b) => b.listened - a.listened)
           .map((song, id) => <TrackSearchResult track={song} key={id} id={id} />)
       ) : (
-        <h1>No songs in playlist.</h1>
+        <h1>No songs in Chart.</h1>
       )}
     </div>
   );
