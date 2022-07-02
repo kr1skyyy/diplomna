@@ -2,7 +2,7 @@ import React from "react"
 import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 
 const CLIENT_ID = '2736f0fba5bd47febe645ba84dc7fa05';
-const REDIRECT_URI = 'http://localhost:3000';
+const REDIRECT_URI = 'http://localhost:4000';
 
 const AUTH_URL =
   `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=streaming%20user-read-email%20user-read-private%20user-library-read%20user-library-modify%20user-read-playback-state%20user-modify-playback-state`
