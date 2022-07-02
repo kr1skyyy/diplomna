@@ -16,6 +16,28 @@ const theme = createTheme();
 
 const Fields = ({ isSignIn, setIsSignIn, isLogged, setIsLogged }) => {
     const [error, setError] = React.useState(false);
+    const emailRef = React.createRef();
+
+    const validateEmail = (email) => {
+      return String(email)
+        .toLowerCase()
+        .match(
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+    };
+
+    React.useEffect(() => {
+      const input = emailRef.current.querySelector('input');
+      input.type = 'email';
+      input.oninput = (e) => {
+        const { value } = e.target;
+        
+        const isValid = validateEmail(value);
+        const message = isValid ? '' : 'Please enter a valid email address!';
+
+        input.setCustomValidity(message);
+      };
+    }, [emailRef]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -50,18 +72,15 @@ const Fields = ({ isSignIn, setIsSignIn, isLogged, setIsLogged }) => {
     return (
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           { error && <h3 className="my-3 text-center" style={{ color: 'red'}}>Error: {error}</h3>}
-          {isSignIn
-          ? <>
-              <TextField margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus />
-              <TextField margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password" /> 
-            </>
-          : <>
+          {!isSignIn &&
+            <>
               <TextField margin="normal" required fullWidth id="firstName" label="First Name" name="firstName" autoFocus />
-              <TextField margin="normal" required fullWidth name="lastName" label="Last Name" type="lastName" id="lastName" /> 
-              <TextField margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" />
-              <TextField margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password" /> 
+              <TextField margin="normal" required fullWidth name="lastName" label="Last Name" type="lastName" id="lastName" />
             </>
           }
+          <TextField ref={emailRef} margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus />
+          <TextField margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="current-password" />
+
 
             <Button
                 type="submit"
