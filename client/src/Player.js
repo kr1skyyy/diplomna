@@ -2,11 +2,30 @@ import { useState, useEffect } from "react"
 import SpotifyPlayer from "react-spotify-web-playback"
 import { createUrl, fetch } from "./util/utils"
 
-export default function Player({ accessToken, trackUri }) {
-  const [play, setPlay] = useState(false)
+export default function Player({ accessToken }) {
+  const [play, setPlay] = useState(true)
+  const [playQueue, setPlayQueue] = useState([]);
   const [requestInProgress, setRequestInProgress] = useState(false);
 
-  useEffect(() => setPlay(true), [trackUri])
+  useEffect(() => {
+    const setPlayerSongs = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+  
+      const { song, playlist } = e.detail;
+      if (song) {
+        setPlayQueue([song.uri || song.id]);
+      } else {
+        setPlayQueue(playlist || []);
+      }
+    };
+
+    document.removeEventListener('set-player-songs', setPlayerSongs);
+    document.addEventListener('set-player-songs', setPlayerSongs);
+  }, [accessToken]);
+  
+  useEffect(() => setPlay(true), [playQueue]);
 
   if (!accessToken) return null
   return (
@@ -23,7 +42,7 @@ export default function Player({ accessToken, trackUri }) {
         }
       }}
       play={play}
-      uris={trackUri ? [trackUri] : []}
+      uris={playQueue ? [...playQueue] : []}
     />
   )
 }

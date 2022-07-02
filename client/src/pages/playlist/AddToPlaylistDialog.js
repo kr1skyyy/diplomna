@@ -1,5 +1,5 @@
 import * as React from "react";
-import PropTypes from "prop-types";
+import { useHistory } from 'react-router-dom';
 import Avatar from "@mui/material/Avatar";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -10,12 +10,12 @@ import Dialog from "@mui/material/Dialog";
 import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 import ToggleButton from "@mui/material/ToggleButton";
-import useFetch from "../../hooks/useFetch";
 import { fetch, createUrl } from "../../util/utils";
 import Loader from "../../Loader";
 
+
 function ToggleBtn({ playlist, track }) {
-  const [selected, setSelected] = React.useState(false);
+  const [selected, setSelected] = React.useState(playlist.songExists || false);
 
   const toggleItem = () => {
     const select = !selected;
@@ -45,11 +45,34 @@ function ToggleBtn({ playlist, track }) {
 }
 
 function SimpleDialog(props) {
-  const { loading, error, value } = useFetch(`playlist/current-user`);
   const { onClose, selectedValue, open, track } = props;
+
+  const history = useHistory();
+  const [playlists, setPlaylists] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    if (open) {
+      setLoading(true);
+      fetch(createUrl(`playlist/current-user`), { trackId: track.uri || track.id }, 'POST')
+        .then((res) => {
+          setLoading(false);
+          setPlaylists(res.playlists);
+        })
+        .catch((e) => setError(e));
+    }
+  }, [open, track.id, track.uri]);
 
   const handleClose = () => {
     onClose(selectedValue);
+    const path = new URL(window.location).pathname;
+    if (path.includes('/playlist')) {
+      history.push('/');
+      setTimeout(() => {
+        history.push(path);
+      });
+    }
   };
 
   if (loading || error) return <Loader />;
@@ -58,19 +81,13 @@ function SimpleDialog(props) {
     <Dialog onClose={handleClose} open={open}>
       <DialogTitle>Add to playlist</DialogTitle>
       <List sx={{ pt: 0 }}>
-        {value.playlists.map((playlist, i) => (
+        {playlists.map((playlist, i) => (
           <ToggleBtn playlist={playlist} track={track} key={i} />
         ))}
       </List>
     </Dialog>
   );
 }
-
-SimpleDialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  selectedValue: PropTypes.string.isRequired,
-};
 
 export default function AddToPlaylistDialog({ track }) {
   const [open, setOpen] = React.useState(false);

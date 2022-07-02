@@ -9,7 +9,7 @@ export default function GenreDetails() {
   const { genre } = useParams();
 
   const playTrack = (song) => {
-    document.dispatchEvent(new CustomEvent('play-track', { detail: { song } }));
+    document.dispatchEvent(new CustomEvent('set-player-songs', { detail: { song } }));
   };
 
   React.useEffect(() => {
@@ -25,7 +25,7 @@ export default function GenreDetails() {
   return (
     <div>
       <h1 className="pb-4">Genre {genre}</h1>
-      {tracks.map((track) => {
+      {tracks.map((track, id) => {
         const smallestAlbumImage = track.album.images.reduce(
           (smallest, image) => {
             if (image.height < smallest.height) return image;
@@ -40,7 +40,7 @@ export default function GenreDetails() {
           uri: track.uri,
           albumUrl: smallestAlbumImage.url,
         };
-        return <TrackSearchResult track={song} chooseTrack={() => playTrack(track)}  />
+        return <TrackSearchResult track={song} key={id} chooseTrack={() => playTrack(track)}  />
       })}
     </div>
   );

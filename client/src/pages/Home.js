@@ -16,7 +16,7 @@ export default function Home() {
     .searchTracks('never gonna give you up')
     .then((data) => {
       const song = data.body.tracks.items[0];
-      document.dispatchEvent(new CustomEvent('play-track', { detail: { song } }));
+      document.dispatchEvent(new CustomEvent('set-player-songs', { detail: { song } }));
     });
   };
 
