@@ -11,7 +11,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
-import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import StackedBarChartIcon from '@mui/icons-material/StackedBarChart';
 import HomeIcon from "@mui/icons-material/Home";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import StarIcon from "@mui/icons-material/Star";
@@ -56,7 +56,7 @@ export default function SidebarDrawer({ children }) {
         <Box sx={{ overflow: "auto" }}>
           <List>
             <ListItem>
-              <ListItemIcon>
+              <ListItemIcon sx={{ minWidth: 36, ml: 1 }}>
                 <AccountCircleIcon />
               </ListItemIcon>
               <ListItemText primary={user.firstName + " " + user.lastName} />
@@ -66,7 +66,7 @@ export default function SidebarDrawer({ children }) {
 
             <Link to="/">
               <ListItem button>
-                <ListItemIcon>
+                <ListItemIcon sx={{ minWidth: 36, ml: 1 }}>
                   <HomeIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Home"} />
@@ -74,23 +74,23 @@ export default function SidebarDrawer({ children }) {
             </Link>
             <Link to="/MyPlaylists">
               <ListItem button>
-                <ListItemIcon>
+                <ListItemIcon sx={{ minWidth: 36, ml: 1 }}>
                   <LibraryMusicIcon />
                 </ListItemIcon>
                 <ListItemText primary={"My Playlists"} />
               </ListItem>
             </Link>
-            <Link to="/Songs">
+            <Link to="/Genres">
               <ListItem button>
-                <ListItemIcon>
-                  <MusicNoteIcon />
+                <ListItemIcon sx={{ minWidth: 36, ml: 1 }}>
+                  <StackedBarChartIcon />
                 </ListItemIcon>
-                <ListItemText primary={"All Songs"} />
+                <ListItemText primary={"Genres"} />
               </ListItem>
             </Link>
             <Link to="/Charts">
               <ListItem button>
-                <ListItemIcon>
+                <ListItemIcon sx={{ minWidth: 36, ml: 1 }}>
                   <StarIcon />
                 </ListItemIcon>
                 <ListItemText primary={"Charts"} />
@@ -100,7 +100,7 @@ export default function SidebarDrawer({ children }) {
             <Divider />
             
             <ListItem button onClick={logout}>
-              <ListItemIcon>
+              <ListItemIcon sx={{ minWidth: 36, ml: 1 }}>
                 <ExitIcon />
               </ListItemIcon>
               <ListItemText primary={"Logout"} />

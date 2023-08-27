@@ -43,7 +43,7 @@ export default function Home() {
               </Button>
             </Grid>
             <Grid item>
-              <Link to="/Songs">
+              <Link to="/Genres">
                 <Button variant="outlined" color="primary">
                   Check music genres
                 </Button>

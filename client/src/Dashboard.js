@@ -7,7 +7,7 @@ import TrackSearchResult from './TrackSearchResult';
 import SpotifyWebApi from 'spotify-web-api-node';
 import Drawer from './layout/Drawer';
 import MyPlaylists from './pages/playlist/MyPlaylists';
-import Songs from './pages/songs/Songs';
+import Songs from './pages/songs/GenresList';
 import GenreDetails from './pages/songs/GenreDetails';
 import PlaylistDetails from './pages/playlist/PlaylistDetails';
 import Charts from './pages/charts/Charts';
@@ -84,11 +84,11 @@ export default function Dashboard({ code }) {
           <Route path="/playlist/:id">
             <PlaylistDetails />
           </Route>
-          <Route path="/Songs">
-            <Songs/>
-          </Route>
           <Route path="/Genres/:genre">
             <GenreDetails />
+          </Route>
+          <Route path="/Genres">
+            <Songs/>
           </Route>
           <Route path="/Charts/:chart">
             <Chart />
